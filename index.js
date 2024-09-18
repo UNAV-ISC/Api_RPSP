@@ -1,7 +1,11 @@
 const express = require('express');
 const mysql = require('mysql2');
 const app = express();
+const multer = require('multer')
 const port = 3000;
+
+const upload  = multer();
+
 
 // Middleware para parsear JSON
 app.use(express.json());
@@ -28,12 +32,15 @@ app.get('/', (req, res) => {
   res.send('Si funciona');
 });
 
+
 // Iniciar el servidor
 app.listen(port, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://198.12.242.203:${port}`);
 });
 
 const cors = require('cors');
+const req = require('express/lib/request');
+const res = require('express/lib/response');
 app.use(cors());
 
 
@@ -51,6 +58,44 @@ app.get('/users', (req, res) => {
       res.json(results);
     });
   });
+});
+//SELECT * FROM users WHERE user=? && phone=?',[user], [phone]
+//Comparacion de Login
+app.post('/login',upload.none(), (req, res) => {
+  // if(req.body && req.body.user && req.body.phoneNumber){
+    // var { user, phoneNumber } = req.body;
+    console.log(req.body)
+    let user= 'Gamaliel';
+    let phoneNumber='+529531437195';
+    console.log(user);
+    console.log(phoneNumber);
+
+    db.connect((err) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      db.query('SELECT * FROM users WHERE user=? AND phoneNumber=?', [user, phoneNumber], (err, results) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        if (results.length > 0) {
+          
+          //res.json(results);
+          res.send(true);
+        } else {
+          //console.log(`Usuario no encontrado: ${user} ${phone}`);
+          
+          res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+      });
+    });
+  // }else{
+    
+  //     console.log(`Usuario no encontrado: ${user} ${phoneNumber}`);
+  //     return res.status(400).json({ error: 'User or phone not provided' });
+
+  // }
+  
 });
 
 // Obtener un item por ID
@@ -106,4 +151,5 @@ app.delete('/items/:id', (req, res) => {
       res.json({ message: 'Item eliminado' });
     });
   });
+
   
